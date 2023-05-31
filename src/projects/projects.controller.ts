@@ -1,4 +1,4 @@
-import { Body, Controller, HttpStatus, Post, Req, Res, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Post, Req, Res, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Produtcs } from './entities/product.entitt';
@@ -37,6 +37,12 @@ export class ProjectsController {
       await this.ProductRepository.save({...products})
       return res.status(HttpStatus.OK).send({ status: "success", message: "Project Added Successfully", })
 
+    }
+
+    @Get('allprojects')
+    async Allprjoects( @Res() res: Response){
+      const allprojects = await this.ProductRepository.find({})
+      return res.status(HttpStatus.OK).send({allprojects})
     }
 }
 
