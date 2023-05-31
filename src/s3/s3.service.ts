@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import * as sharp from 'sharp';
 import { Storage } from '@google-cloud/storage';
 import { Produtcs } from 'src/projects/entities/product.entitt';
+const fs = require('fs');
 
 @Injectable()
 export class GCSStorageService  {
@@ -25,6 +26,33 @@ export class GCSStorageService  {
               const imageBuffer = await sharp(file.buffer).webp().toBuffer();
               await fileObject.save(imageBuffer, {
                 contentType: 'image/webp',
+                public: true,
+                validation: 'md5',
+              });
+          
+              const fileUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
+              console.log(`File uploaded successfully to ${fileUrl}`);
+              return fileUrl;
+            } catch (err) {
+              console.error('Error uploading file to Google Cloud Storage:', err);
+              throw err;
+            }
+          }
+
+
+          async Addvideos(file: Express.Multer.File) {
+            const serviceAccountKeyFile = 's3config.json';
+            process.env.GOOGLE_APPLICATION_CREDENTIALS = serviceAccountKeyFile;
+            const storage = new Storage({ keyFilename: serviceAccountKeyFile });
+            const bucketName = 'cdn.flyfarladies.com'; // Replace with your actual bucket name
+            const bucket = storage.bucket(bucketName);
+            const fileName = `${file.originalname}`;
+            const fileObject = bucket.file(fileName);
+          
+            try {
+            
+              await fileObject.save(file.buffer, {
+                contentType: 'video/mp4',
                 public: true,
                 validation: 'md5',
               });
