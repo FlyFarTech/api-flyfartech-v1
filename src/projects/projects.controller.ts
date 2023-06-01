@@ -9,6 +9,9 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { Hero } from './entities/hero.entity';
 import { Services } from './entities/services.entity';
 import { Contact } from './entities/contact.entity';
+import { Blog } from './entities/blog.entity';
+import { Employee } from './entities/employe.entity';
+import { Testimonial } from './entities/testimonial.entity';
 
 @Controller('projects')
 export class ProjectsController {
@@ -17,8 +20,69 @@ export class ProjectsController {
     @InjectRepository(Hero) private HeroRepository: Repository<Hero>,
     @InjectRepository(Services) private ServicesRepository: Repository<Services>,
     @InjectRepository(Contact) private ContactRepository: Repository<Contact>,
+    @InjectRepository(Blog) private BlogRepository: Repository<Blog>,
+    @InjectRepository(Employee) private EmployeeRepository: Repository<Employee>,
+    @InjectRepository(Testimonial) private TestimonialRepository: Repository<Testimonial>,
     private readonly projectsService: ProjectsService,
     private s3service: GCSStorageService) {}
+
+
+    @Post('addtestimonial')
+    @UseInterceptors(FileFieldsInterceptor([
+      { name: 'imageurl', maxCount: 2 }]))
+    async addtestimonial( 
+      @UploadedFiles()
+      file: {
+        imageurl?: Express.Multer.File},
+    @Req() req: Request,
+    @Body() body,
+    @Res() res: Response){
+      const{Designation,FullName,Review,Description} =req.body;
+      const imageurl = file.imageurl? await this.s3service.Addimage(file.imageurl[0]):null
+      const testimonial  = new Testimonial()
+      testimonial.imageurl =imageurl
+      testimonial.Review =Review
+      testimonial.FullName = FullName
+      testimonial.Designation =Designation
+      testimonial.Description=Description
+      await this.TestimonialRepository.save({...testimonial})
+      return res.status(HttpStatus.OK).send({ status: "success", message: "testimonial Added Successfully", })
+    }
+
+
+    @Get('alltestimonial')
+    async alltestimonial( @Res() res: Response){
+      const alltestimonial = await this.TestimonialRepository.find({})
+      return res.status(HttpStatus.OK).send({alltestimonial})  
+    }
+
+
+    @Post('addemployee')
+    @UseInterceptors(FileFieldsInterceptor([
+      { name: 'imageurl', maxCount: 2 }]))
+    async addemployee( 
+      @UploadedFiles()
+      file: {
+        imageurl?: Express.Multer.File},
+    @Req() req: Request,
+    @Body() body,
+    @Res() res: Response){
+      const{Designation,FullName} =req.body;
+      const imageurl = file.imageurl? await this.s3service.Addimage(file.imageurl[0]):null
+      const employee  = new Employee()
+      employee.imageurl =imageurl
+      employee.FullName = FullName
+      employee.Designation =Designation
+      await this.EmployeeRepository.save({...employee})
+      return res.status(HttpStatus.OK).send({ status: "success", message: "Employee Added Successfully", })
+    }
+
+    @Get('allemployee')
+    async allemployee( @Res() res: Response){
+      const allprojects = await this.EmployeeRepository.find({})
+      return res.status(HttpStatus.OK).send({allprojects})
+    }
+
 
     @Post('AddProject')
     @UseInterceptors(FileFieldsInterceptor([
@@ -41,6 +105,12 @@ export class ProjectsController {
       products.Projectlink =Projectlink
       await this.ProductRepository.save({...products})
       return res.status(HttpStatus.OK).send({ status: "success", message: "Project Added Successfully", })
+    }
+
+    @Get('allprojects')
+    async Allprjoects( @Res() res: Response){
+      const allprojects = await this.ProductRepository.find({})
+      return res.status(HttpStatus.OK).send({allprojects})
     }
 
 
@@ -66,6 +136,12 @@ export class ProjectsController {
       await this.ContactRepository.save({...products})
       return res.status(HttpStatus.OK).send({ status: "success", message: "Thanks for contacting with us", })
     }
+    
+    @Get('allcontact')
+    async allcontact( @Res() res: Response){
+      const allcontact = await this.ContactRepository.find({})
+      return res.status(HttpStatus.OK).send({allcontact})
+    }
 
     
     @Post('Addservices')
@@ -79,7 +155,11 @@ export class ProjectsController {
       products.TextField =TextField
       await this.ServicesRepository.save({...products})
       return res.status(HttpStatus.OK).send({ status: "success", message: "Services Added Successfully", })
-
+    }
+    @Get('allservices')
+    async allservices( @Res() res: Response){
+      const allservices = await this.ServicesRepository.find({})
+      return res.status(HttpStatus.OK).send({allservices})
     }
 
 
@@ -114,29 +194,39 @@ export class ProjectsController {
       return res.status(HttpStatus.OK).send({ status: "success", message: "Project Added Successfully", })
 
     }
-
-    @Get('allprojects')
-    async Allprjoects( @Res() res: Response){
-      const allprojects = await this.ProductRepository.find({})
-      return res.status(HttpStatus.OK).send({allprojects})
-    }
-
-    @Get('allservices')
-    async allservices( @Res() res: Response){
-      const allservices = await this.ServicesRepository.find({})
-      return res.status(HttpStatus.OK).send({allservices})
-    }
-
     @Get('allvideos')
     async allvideos( @Res() res: Response){
       const allvideos = await this.HeroRepository.find({})
       return res.status(HttpStatus.OK).send({allvideos})
     }
 
-    @Get('allcontact')
-    async allcontact( @Res() res: Response){
-      const allcontact = await this.ContactRepository.find({})
-      return res.status(HttpStatus.OK).send({allcontact})
+
+    @Post('createblog')
+    @UseInterceptors(FileFieldsInterceptor([
+      { name: 'imageurl', maxCount: 2 }]))
+    async createblog( 
+      @UploadedFiles()
+      file: {
+      imageurl?: Express.Multer.File},
+      @Req() req: Request,
+      @Body() body,
+      @Res() res: Response){
+      const{Category, Title,Designation,WrittenBy } =req.body;
+      const url = file.imageurl? await this.s3service.Addimage(file.imageurl[0]):null
+      const blog  = new Blog()
+      blog.Category =Category
+      blog.imageurl = url
+      blog.Title =Title
+      blog.Designation =Designation
+      blog.WrittenBy =WrittenBy
+      await this.BlogRepository.save({...blog})
+      return res.status(HttpStatus.OK).send({ status: "success", message: "Blog created Successfully", })
+    }
+
+    @Get('allblog')
+    async allblog( @Res() res: Response){
+      const allblog = await this.BlogRepository.find({})
+      return res.status(HttpStatus.OK).send({allblog})
     }
 }
 

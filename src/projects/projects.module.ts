@@ -7,9 +7,12 @@ import { S3Module } from 'src/s3/s3.module';
 import { Hero } from './entities/hero.entity';
 import { Services } from './entities/services.entity';
 import { Contact } from './entities/contact.entity';
+import { Blog } from './entities/blog.entity';
+import { Employee } from './entities/employe.entity';
+import { Testimonial } from './entities/testimonial.entity';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([Produtcs, Hero, Services, Contact]),S3Module],
+  imports:[TypeOrmModule.forFeature([Produtcs, Hero, Services, Contact, Blog,Employee, Testimonial]),S3Module],
   controllers: [ProjectsController],
   providers: [ProjectsService]
 })
