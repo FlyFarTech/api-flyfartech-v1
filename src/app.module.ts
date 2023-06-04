@@ -26,8 +26,9 @@ import { Employee } from './projects/entities/employe.entity';
       // host: "127.0.0.1",
       // database:"flyfartech",
       // port:3306,
-      // entities:[Produtcs,Hero,Services,Contact, Blog,Employee,Testimonial],
+      entities:[Produtcs,Hero,Services,Contact, Blog,Employee,Testimonial],
       synchronize:false
+
     }
     ),
     ProjectsModule
